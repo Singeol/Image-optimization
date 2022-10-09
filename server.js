@@ -3,7 +3,13 @@ import { doConvert } from './index.js'
 
 const requestListener = function (req, res) {
   var a = (req.url).split("?")
-  const options = {}
+  let options = {
+    width: 0, 
+    height: 0, 
+    path: '', 
+    codec: 'webp', 
+    quality: 75
+  }
   a.forEach(function(val) {
     let splitted = val.split("=")
     let key = splitted[0]
@@ -16,10 +22,11 @@ const requestListener = function (req, res) {
   const height = parseInt(options.height);
   const codec = options.codec;
   const quality = parseInt(options.quality);
-  doConvert(path, width, height, quality, codec)
-  console.log(path, width, height, codec, quality)
+  doConvert(path, width, height, quality, codec);
+  console.log(path, width, height, quality, codec)
   res.writeHead(200);
+  res.end('OK');
 }
 
 const server = http.createServer(requestListener);
-server.listen(8000);
+server.listen(8000, 'localhost');

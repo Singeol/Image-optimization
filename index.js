@@ -1,11 +1,11 @@
 import { ImagePool } from '@squoosh/lib';
 import fs from 'fs/promises';
-const imagePool = new ImagePool();
 
 export async function doConvert(path, width, height, quality, codec) {
+  const imagePool = new ImagePool();
   try {
-    const imagePath = path;
-    const image = imagePool.ingestImage(imagePath);
+    // const imagePath = path;
+    const image = imagePool.ingestImage(path);
 
     await image.decoded;
     if (width != 0 && height != 0) {
@@ -20,33 +20,16 @@ export async function doConvert(path, width, height, quality, codec) {
     
       await image.preprocess(preprocessOptions);
     }
-    let encodeOptions = {}
-    switch(codec) {
-      case 'avif': 
-        encodeOptions = {
-        avif: {},
-        quality: quality
-      };
-      break;
-      case 'webp': 
-        encodeOptions = {
-        webp: {},
-        quality: quality
-      };
-      break;
-      case 'jpeg': 
-        encodeOptions = {
-        mozjpeg: {},
-        quality: quality
-      };
-      break;
-    }
-    console.log(encodeOptions);
+    
+    let encodeOptions = {};
+    encodeOptions[codec] = {};
+    encodeOptions['quality'] = quality;
+    
     await image.encode(encodeOptions);
 
     await imagePool.close();
 
-    const newImagePath = './image.'; //extension is added automatically
+    const newImagePath = './images/image.'; //extension is added automatically
 
     for (const encodedImage of Object.values(image.encodedWith)) {
       fs.writeFile(
