@@ -1,31 +1,35 @@
 import http from 'http';
-import { doConvert } from './index.js'
+import url from 'url';
+import { existsSync, readFileSync } from 'node:fs';
+import { doConvert } from './optimize.js'
 
 const requestListener = function (req, res) {
-  var a = (req.url).split("?")
-  let options = {
-    width: 0, 
-    height: 0, 
-    path: '', 
-    codec: 'webp', 
-    quality: 75
+  const urlParsed = url.parse(req.url, true);
+  let path = urlParsed.pathname;
+  if (/[a-zA-Z0-9].(jpg|jpeg|png|bmp|avif|webp)/.test(path)) {
+    if (existsSync('./images' + path)) {
+      var img = readFileSync('./images' + path);
+      res.writeHead(200, {'Content-Type': 'image/jpg' });
+      res.end(img, 'binary');
+    }
+    else {
+      try {
+        let name = path.substring(1, path.search(/[0-9]/));
+        let buf = path.substring(path.search(/[0-9]/));
+        let width = parseInt(buf.substring(0, buf.indexOf('.')));
+        let codec = buf.substring(buf.indexOf('.') + 1);
+        codec = (codec === 'jpg' | codec === 'jpeg') ? 'mozjpeg' : codec;
+        doConvert(name, width, codec);
+        res.writeHead(200, {'Content-Type': 'image/jpg' });
+        res.end(img, 'binary');
+      }
+      catch (err) {
+        console.log(err);
+      }
+      
+    }
   }
-  a.forEach(function(val) {
-    let splitted = val.split("=")
-    let key = splitted[0]
-    let value = splitted[1]
-    options[key] = value
-  })
-  console.log(options);
-  const path = options.path;
-  const width = parseInt(options.width);
-  const height = parseInt(options.height);
-  const codec = options.codec;
-  const quality = parseInt(options.quality);
-  doConvert(path, width, height, quality, codec);
-  console.log(path, width, height, quality, codec)
-  res.writeHead(200);
-  res.end('OK');
+
 }
 
 const server = http.createServer(requestListener);
