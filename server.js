@@ -14,10 +14,14 @@ const requestListener = function (req, res) {
     }
     else {
       try {
-        let name = path.substring(1, path.search(/[0-9]/));
-        let buf = path.substring(path.search(/[0-9]/));
-        let width = parseInt(buf.substring(0, buf.indexOf('.')));
-        let codec = buf.substring(buf.indexOf('.') + 1);
+        let params = path.split('.');
+        let name = params[0];
+        let width = parseInt(params[1]);
+        let codec = params[2];
+        // let name = path.substring(1, path.search(/[0-9]/));
+        // let buf = path.substring(path.search(/[0-9]/));
+        // let width = parseInt(buf.substring(0, buf.indexOf('.')));
+        // let codec = buf.substring(buf.indexOf('.') + 1);
         codec = (codec === 'jpg' | codec === 'jpeg') ? 'mozjpeg' : codec;
         doConvert(name, width, codec);
         res.writeHead(200, {'Content-Type': 'image/jpg' });

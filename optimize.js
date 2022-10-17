@@ -1,17 +1,22 @@
 import { ImagePool } from '@squoosh/lib';
 import fs from 'fs/promises';
 import { readdirSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 function findOriginal(folder, name) {
-  var originalImage = '';
-  var file;
-  readdirSync(folder).forEach(file => {
-    let filename = file.substring(0, file.indexOf('.'));
-    if (filename == name) {
-      originalImage = file;
-    }
-  });
-    return originalImage;
+  let extensions = ['.jpg', '.jpeg', '.png', '.bpm'];
+  for (let extension of extensions) {
+    if (existsSync(folder + name + extension)) return name+extension;
+  }
+  // var originalImage = '';
+  // var file;
+  // readdirSync(folder).forEach(file => {
+  //   let filename = file.substring(0, file.indexOf('.'));
+  //   if (filename == name) {
+  //     originalImage = file;
+  //   }
+  // });
+  //   return originalImage;
 }
 
 export async function doConvert(name, width, codec) {
@@ -41,7 +46,7 @@ export async function doConvert(name, width, codec) {
 
     await imagePool.close();
 
-    const newImagePath = imagesPath + name + width + '.'; //extension is added automatically
+    const newImagePath = imagesPath + name + '.' + width + '.'; //extension is added automatically
 
     for (const encodedImage of Object.values(image.encodedWith)) {
       fs.writeFile(
